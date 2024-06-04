@@ -1,0 +1,26 @@
+﻿  CompressAlgorithm.c
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.h(17,9): warning C4068: unknown pragma 'GCC'
+  (compiling source file 'CompressAlgorithm.c')
+  
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.h(18,9): warning C4068: unknown pragma 'GCC'
+  (compiling source file 'CompressAlgorithm.c')
+  
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.h(132,9): warning C4068: unknown pragma 'GCC'
+  (compiling source file 'CompressAlgorithm.c')
+  
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\CompressAlgorithm.c(72,10): warning C4013: 'open' undefined; assuming extern returning int
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\CompressAlgorithm.c(77,5): warning C4013: 'read' undefined; assuming extern returning int
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\CompressAlgorithm.c(78,5): warning C4013: 'close' undefined; assuming extern returning int
+  cd.c
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.h(17,9): warning C4068: unknown pragma 'GCC'
+  (compiling source file 'cd.c')
+  
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.h(18,9): warning C4068: unknown pragma 'GCC'
+  (compiling source file 'cd.c')
+  
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.h(132,9): warning C4068: unknown pragma 'GCC'
+  (compiling source file 'cd.c')
+  
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(27,5): warning C4013: 'memcpy' undefined; assuming extern returning int
+  Generating Code...
+  CompressAlgorithm.vcxproj -> D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\x64\Debug\CompressAlgorithm.exe

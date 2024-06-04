@@ -1,0 +1,10 @@
+﻿  cd.c
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(21,5): warning C4013: 'memcpy' undefined; assuming extern returning int
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(24,41): warning C4244: '=': conversion from 'uint64_t' to 'uint16_t', possible loss of data
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(26,48): warning C4244: '=': conversion from 'uint64_t' to 'uint16_t', possible loss of data
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(135,15): warning C4133: 'initializing': incompatible types - from 'uint8_t *' to 'cd_hdr_t *'
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(201,36): warning C4244: 'initializing': conversion from 'uint64_t' to 'uint16_t', possible loss of data
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(212,39): warning C4244: 'initializing': conversion from 'uint64_t' to 'uint32_t', possible loss of data
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(224,32): warning C4244: 'initializing': conversion from 'uint64_t' to 'uint16_t', possible loss of data
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(235,35): warning C4244: 'initializing': conversion from 'uint64_t' to 'uint32_t', possible loss of data
+  CompressAlgorithm.vcxproj -> D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\Debug\CompressAlgorithm.exe
