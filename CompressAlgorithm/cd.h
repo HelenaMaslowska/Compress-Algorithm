@@ -7,11 +7,20 @@
 #define CD_PIXEL_COLOR_DEPTH        16          // liczba bitow na piksel
 #pragma pack(push,1)
 //------------------------------------------------------------------------------
+/*
 enum
 {
-        code_type_palette,                      //Header, Rect, Size, Palette, Dane
-        code_type_rre,                          //Header, Rect, Size, Color
-        code_type_raw,                          //Header, Rect, Size, Color, Color ....
+    code_type_palette,                      //Header, Rect, Size, Palette, Dane
+    code_type_rre,                          //Header, Rect, Size, Color
+    code_type_raw,                          //Header, Rect, Size, Color, Color ....
+};
+*/
+//------------------------------------------------------------------------------
+enum
+{
+    code_type_palette,                      //
+    code_type_rre,                          //Header, [Offset], Size, Color
+    code_type_raw,                          //Header, [Offset], Size, Color, Color ....
 };
 //------------------------------------------------------------------------------
 typedef struct
@@ -35,16 +44,17 @@ typedef struct
 {
     uint8_t     code_type               :   2;
     uint8_t     code_rect_exists        :   1;
-    uint8_t     size_width              :   2;  //mowi o ilosci bajtow pola Size. Wartosc pola 0 oznacza ze dlugosc pola Size wynosi 1 bajt, 1 - 2 bajtym 2 - 3 bajty 3 - bajty
+    uint8_t     size_width              :   2;  //mowi o ilosci bajtow pola Size. Wartosc pola 0 oznacza ze dlugosc pola Size wynosi 1 bajt, 1 - 2 bajtym 2 - 3 bajty
     uint8_t     reserve                 :   3;
 } cd_hdr_rre_t;         //1 bajt
 //------------------------------------------------------------------------------ 
 typedef struct
 {
     uint8_t     code_type               :   2;
-    uint8_t     code_rect_exists        :   1;
-    uint8_t     size_width              :   2;  //mowi o ilosci bajtow pola Size. Wartosc pola 0 oznacza ze dlugosc pola Size wynosi 1 bajt, 1 - 2 bajtym 2 - 3 bajty 3 - bajty
-    uint8_t     reserve                 :   3;
+    uint8_t     offset_exists           :   1;
+    uint8_t     offset_size             :   2;  //mowi o ilosci bajtow offsetu. Offset wynosi  0: 1 bajt,   1: 2 bajty,   2: 3 bajty,   3: 4 bajty
+    uint8_t     data_size               :   2;  //mowi o ilosci bajtow size. Size wynosi  0: 1 bajt,   1: 2 bajty,   2: 3 bajty,   3: 4 bajty
+    uint8_t     reserve                 :   1;
 } cd_hdr_raw_t;         //1 bajt
 //------------------------------------------------------------------------------
 typedef struct
@@ -60,11 +70,11 @@ typedef struct
     uint8_t     t[5];
  } cd_rect_10_t;        //5 bajtow
 //------------------------------------------------------------------------------
-typedef struct
+/*typedef struct
 {
     uint8_t     level_0                 :   4;
     uint8_t     level_1                 :   4;
-} cd_color_2x4_t;
+} cd_color_2x4_t;*/
 //------------------------------------------------------------------------------
 typedef struct
 {
@@ -84,6 +94,22 @@ typedef struct
     uint8_t     g;
     uint8_t     b;
 } cd_color_24_t;
+//------------------------------------------------------------------------------
+typedef struct
+{
+    uint8_t     code_type           : 2;
+    uint8_t     offset_width        : 2;
+    uint8_t     size_width          : 2;
+    uint8_t     reserve             : 2;
+} cd_hdr_strip_t;             //1 bajt
+//------------------------------------------------------------------------------
+/*typedef struct
+{
+    uint32_t start_px                   :   12;
+    uint32_t strip_size_px              :   12;
+    uint32_t code_type                  :   2;
+    uint32_t reserve                    :   6;
+}strip_t;   */
 #pragma pack()
 //------------------------------------------------------------------------------
 #if (CD_PIXEL_COLOR_DEPTH == 4)
@@ -120,6 +146,12 @@ int8_t  cd_encode(  void        *buf_screen,            //wskaznik na caly obraz
                     void        *buf_encoded,           //bufora na dane zakodowane
                     uint32_t    *size_buf_encoded       //rozmiar pamieci wskazywany przez wskaznik buf_encoded i jednoczesnie po zakonczeniu dzialania funkcji jest to rozmiar zakodowanych danych
                  );                                     //zwraca 0-OK lub inna wartosc gdy blad
+
+int8_t  cd_encode2( void* prev_buf_screen,
+                    void* buf_screen,                   //wskaznik na caly obraz
+                    void* buf_encoded,                  //wskaznik na dane zakodowane
+                    uint32_t* size_buf_encoded          //rozmiar pamieci wskazywany przez wskaznik buf_encoded i jednoczesnie pozakonczeniu dzialania funkcji jest to rozmiar zakodowanych danych
+);                                                      //zwraca 0 gdy ok lub -1 gdy blad
 //------------------------------------------------------------------------------
 int8_t  cd_decode(  void        *buf_encoded,           //bufora na dane zakodowane
                     uint32_t    size_buf_encoded,       //rozmiar danych zakodowanych

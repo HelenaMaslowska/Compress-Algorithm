@@ -6,7 +6,12 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <conio.h> 
+#include <string.h> 
+#include <io.h>      // Nag³ówek dla close() i _read()
+
 #include "cd.h"
+
 
 void dump_frame_hex(void* buf, int size)
 {
@@ -50,50 +55,95 @@ long getFileSize(const char* filename) {
     return fileSize;
 }
 
+static void *alloc_read_file(char * filename, uint32_t *file_size)
+{
+    int ret;
+    long size = getFileSize(filename);
+
+    printf("Otwieranie pliku %s pliku o rozmiarze %d\n", filename, size);
+    
+    void* buf = malloc(size);
+
+    if (!buf)
+    {
+        return NULL;
+    }
+
+    int fd = _open(filename, O_RDWR);
+    if (fd == -1)
+    {
+        printf("Error opening file %s\n", filename);
+        return NULL;
+    }
+    ret = _read(fd, buf, size);
+    _close(fd);
+
+    *file_size = size;
+    return buf;
+}
+
+
 int main()
 {
     int8_t ret;
-    cd_rect_t rect;
     uint32_t  size_buf_encoded = (CD_SCREEN_SIZE_WIDTH * CD_SCREEN_SIZE_HEIGHT * CD_PIXEL_COLOR_DEPTH) / 8 + 10;
+    void* buf_encoded = calloc(size_buf_encoded, 1);
+    /*cd_rect_t rect;
+    
     uint32_t size_buf_screen = (CD_SCREEN_SIZE_WIDTH * CD_SCREEN_SIZE_HEIGHT * CD_PIXEL_COLOR_DEPTH) / 8;
 
-    void* buf_encoded = calloc(size_buf_encoded, 1);
-
-    cd_conv_xywh2rect(0,0, CD_SCREEN_SIZE_WIDTH, CD_SCREEN_SIZE_HEIGHT, &rect);
-
-    char filename[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\photo";
-    char filename2[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\data_encoded";
-    char filename3[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\data_decoded";
-
     
-    long size = getFileSize(filename);
-    printf("Rozmiar pliku %d \n", size);
-    void* buf_screen = calloc(size, 1);
+    */
 
-    int fd = open(filename, O_RDWR);
-    if (fd == -1) {
-        printf("Error opening file");
-        return EXIT_FAILURE;
-    }
-    read(fd, buf_screen, size);
-    close(fd);
+    //cd_conv_xywh2rect(0, 0, CD_SCREEN_SIZE_WIDTH, CD_SCREEN_SIZE_HEIGHT, &rect);
+    //cd_conv_xywh2rect(10, 10, 30, 30, &rect);
+
+
+    void* buf_screen;
+    void* prev_buf_screen;
+
+    char filename1[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\photo";
+    char filename2[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\vector";
+    char filename3[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\data_encoded";
+    char filename4[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\data_decoded";
+
+    uint32_t filename1_size;
+    uint32_t filename2_size;
+    //uint32_t filename3_size;
+    //uint32_t filename4_size;
+
+    buf_screen      = alloc_read_file(filename1,    &filename1_size);
+    prev_buf_screen = alloc_read_file(filename2,    &filename2_size);
+
+
+
+
+
 // -------------------------------------------- KODOWANIE --------------------------------------------
-    ret = cd_encode(
+    //ret = cd_encode(
+    //    buf_screen,                   //wskaznik na caly obraz
+    //    &rect,                  //prostokat ktory wskazuje jakie dane zakodowac
+    //    buf_encoded,            //wsk bufora na dane zakodowane
+    //    &size_buf_encoded       //rozmiar pamieci wskazywany przez wskaznik buf_encoded i jednoczesnie pozakonczeniu dzialania funkcji jest to rozmiar zakodowanych danych
+    //);
+
+    ret = cd_encode2(
+        prev_buf_screen,
         buf_screen,                   //wskaznik na caly obraz
-        &rect,                  //prostokat ktory wskazuje jakie dane zakodowac
         buf_encoded,            //wsk bufora na dane zakodowane
         &size_buf_encoded       //rozmiar pamieci wskazywany przez wskaznik buf_encoded i jednoczesnie pozakonczeniu dzialania funkcji jest to rozmiar zakodowanych danych
     );
 
+    /*
     if (ret == 0)
     {
         printf("Zakodowane dane: ");
-        dump_frame_hex(buf_encoded, /*size_buf_encoded*/256);
+        dump_frame_hex(buf_encoded, size_buf_encoded);
     }
 
     fd = open(filename2, O_WRONLY | O_CREAT);
     if (fd == -1) {
-        printf("Error opening file");
+        printf("Error opening file %s\n", filename2);
         //return EXIT_FAILURE;
     }
     else
@@ -113,7 +163,7 @@ int main()
 
     fd = open(filename3, O_WRONLY | O_CREAT);
     if (fd == -1) {
-        printf("Error opening file");
+        printf("Error opening file %s\n", filename3);
         //return EXIT_FAILURE;
     }
     else
@@ -122,5 +172,5 @@ int main()
         close(fd);
     }
 
-    printf("code returned %d\n", (int)ret);
+    printf("code returned %d\n", (int)ret);*/
 }
