@@ -1,4 +1,28 @@
 ﻿  cd.c
-D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(327,14): warning C4047: 'initializing': 'uint32_t' differs in levels of indirection from 'uint8_t *'
-D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(348,1): warning C4715: 'encode_raw': not all control paths return a value
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(353,31): warning C4047: 'function': 'uint32_t' differs in levels of indirection from 'uint32_t *'
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(353,31): warning C4024: 'convert_to_data_size': different types for formal and actual parameter 1
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(357,26): warning C4047: 'function': 'uint32_t' differs in levels of indirection from 'uint32_t *'
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(357,26): warning C4024: 'convert_to_data_size': different types for formal and actual parameter 1
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(364,26): warning C4022: 'memcpy': pointer mismatch for actual parameter 2
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(369,22): warning C4022: 'memcpy': pointer mismatch for actual parameter 2
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(498,45): warning C4047: 'function': 'uint32_t' differs in levels of indirection from 'uint32_t *'
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(498,45): warning C4024: 'encode_raw': different types for formal and actual parameter 3
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(502,45): warning C4047: 'function': 'uint32_t' differs in levels of indirection from 'uint32_t *'
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(502,45): warning C4024: 'encode_raw': different types for formal and actual parameter 3
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(548,58): warning C4047: 'function': 'uint32_t' differs in levels of indirection from 'uint32_t **'
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(548,58): warning C4024: 'encode_raw': different types for formal and actual parameter 3
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(581,54): warning C4047: 'function': 'uint32_t' differs in levels of indirection from 'uint32_t **'
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(581,54): warning C4024: 'encode_raw': different types for formal and actual parameter 3
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(588,58): warning C4047: 'function': 'uint32_t *' differs in levels of indirection from 'uint32_t **'
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(588,58): warning C4024: 'encode_rre': different types for formal and actual parameter 3
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(588,77): warning C4020: 'encode_rre': too many actual parameters
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(592,58): warning C4047: 'function': 'uint32_t *' differs in levels of indirection from 'uint32_t **'
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(592,58): warning C4024: 'encode_rre': different types for formal and actual parameter 3
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(592,77): warning C4020: 'encode_rre': too many actual parameters
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(595,58): warning C4047: 'function': 'uint32_t' differs in levels of indirection from 'uint32_t **'
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(595,58): warning C4024: 'encode_raw': different types for formal and actual parameter 3
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(602,54): warning C4047: 'function': 'uint32_t' differs in levels of indirection from 'uint32_t **'
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(602,54): warning C4024: 'encode_raw': different types for formal and actual parameter 3
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(322,1): warning C4716: 'encode_rre': must return a value
+D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(380,1): warning C4715: 'encode_raw': not all control paths return a value
   CompressAlgorithm.vcxproj -> D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\Debug\CompressAlgorithm.exe

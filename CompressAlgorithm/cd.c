@@ -204,8 +204,8 @@ static int compare_pixel(void* image1, void* image2, uint32_t index1, uint32_t i
 
 typedef struct
 {
-    uint32_t    index;
-    uint32_t    size;
+    uint32_t    index;  // pixel index
+    uint32_t    size;   // pixels
     void        *next;
 } strips_list_t;
 
@@ -266,7 +266,7 @@ static void split_into_strips(void* prev_buf_screen, void* buf_screen)
 
         if (started)
         {
-            if (counter < -100)
+            if (counter < -10)
             {
                 add_to_list(index_start, index_stop - index_start+1);
 
@@ -321,29 +321,61 @@ static uint8_t encode_rre(void* buf_screen, void* buf_encoded, uint32_t* size_bu
 
 }
 
-static uint8_t encode_raw(void* buf_screen, uint8_t* be, uint32_t* size_buf_encoded, uint8_t is_offset, uint32_t offset, uint32_t pixels_count)
+static void convert_to_data_size(uint32_t x)
+{
+    if (x < 256)                   x = 0;  // 1 bajt
+    else if (x < 256 * 256)        x = 1;  // 2 bajty
+    else if (x < 256 * 256 * 256)  x = 2;  // 3 bajty
+    else                           x = 3;  // 4 bajty
+}
+
+static uint8_t encode_raw(void* buf_screen, void* buf_encoded, uint32_t size_buf_encoded, uint8_t if_index, uint32_t index, uint32_t pixels_count)
 {
     cd_hdr_raw_t* hdr;
-    uint32_t ptr = be;                 // TODO CHECK!! tu mi chodzi o wskaznik na miejsce ktore jest nowe w be gdzie mozna zapisywac
-    uint32_t target_size = *size_buf_encoded;
-    // dodaj header
-    
+    uint32_t ptr = size_buf_encoded;                 // TODO CHECK!! tu mi chodzi o wskaznik na miejsce ktore jest nowe w be gdzie mozna zapisywac
+    uint32_t target_size = size_buf_encoded;
+    uint32_t index_bytes = cd_to_bytes(index);
+    uint32_t size_bytes = cd_to_bytes(pixels_count);
+    uint32_t size = size_bytes;
 
+
+    uint8_t* bs = (uint8_t*)buf_screen;
+    uint8_t* be = (uint8_t*)buf_encoded;
+    
+    // | H | S | D |
+    // H - header, little endian example: 01 10 1 10
     if (ptr + 1 > target_size) return -1;
     hdr = (cd_hdr_raw_t*)&be[ptr];
+    hdr->code_type = code_type_raw;
+    hdr->offset_exists = if_index;
+    if (if_index)
+    {
+         convert_to_data_size(&index_bytes);      // 0: 1 bajt, 1: 2 bajty, 2: 3 bajty
+         hdr->offset_size = index_bytes;
+    }
+    else hdr->offset_size = 0;
+    convert_to_data_size(&size_bytes);  // 0: 1 bajt, 1: 2 bajty, 2: 3 bajty
+    hdr->data_size = size_bytes;
     ptr++;
 
-    // define type
-    hdr->code_type = code_type_raw;
-    hdr->offset_exists = is_offset;
-
-    if (is_offset)
+    // O - index/offset if exists
+    if (if_index)
     {
-        // dodaj offset
-        hdr->offset_exists = offset;
+        memcpy(&be[ptr], index, sizeof(index));
+        ptr += sizeof(index);
     }
 
-    // dodaj data size
+    // S - size data
+    memcpy(&be[ptr], size, sizeof(size));
+    ptr += sizeof(size);
+    
+    // D - data
+    uint32_t to_write = cd_to_bytes(pixels_count);
+    if (ptr + to_write > target_size) return -1;
+    memcpy(&be[ptr], bs, to_write);
+    ptr += to_write;
+    // bs += cd_to_bytes(CD_SCREEN_SIZE_WIDTH);
+
     
 }
 
@@ -440,84 +472,141 @@ static uint8_t encode_strips(void* buf_screen, void* buf_encoded, uint32_t* size
         strip = strip->next;
     }
 */ 
+
+     //uint32_t        encoded_count_bytes;
+
+    // Obs³uga 1 paska
+    strips_list_t*  strip = list_head;
+    uint32_t        first_i;
+    uint32_t        first_index;
+    uint32_t        curr_index;
+    uint32_t        strip_size;
     uint32_t        same = 0;
     uint32_t        not_same = 0;
+
+    // Obs³uga pikseli
     cd_color_t      prev;
     cd_color_t      curr;
     cd_color_t      next;
-    strips_list_t*  strip = list_head;
-    uint32_t        first_index;
-    uint32_t        curr_index;
-    uint32_t        size1;
-    //uint32_t        encoded_count_bytes;
-    uint8_t* bs = (uint8_t*)buf_screen;
-    uint8_t* be = (uint8_t*)buf_encoded;
-    uint8_t         if_offset = 1;
+    
+    // Obs³uga offsetu w buff_encoded
+    uint8_t         if_index = 1;
     uint32_t        offset = 0;
-        
-    // TODO przypadki gdy strip = 1, 2
+    int licznikRAW = 0, licznikRRE = 0;
+
     while (strip)
-    {
-        first_index = strip->index;
-        curr_index = strip->index+1;
-        size1 = strip->size;
-        if_offset = 1;
-        offset = strip->index - offset;     // na poczatku offset = 0, potem offset zmienia sie na koncu petli, odejmujemy tutaj offset = (index - prev_index)
-        for (uint32_t k = 1; k < size1 - 1; k++, curr_index++)
+    {    
+        if (strip->size <= 2)
         {
-            get_pixel(buf_screen, curr_index -1, &prev);
+            encode_raw(buf_screen, buf_encoded, size_buf_encoded, 1, strip->index, strip->size);
+        }
+        else
+        {
+        first_i = strip->index;
+        first_index = strip->index;
+        curr_index = strip->index + 1;
+        strip_size = strip->size; // pixels
+        if_index = 1;
+        offset = strip->index - offset;     // na poczatku offset = 0, potem offset zmienia sie na koncu petli, odejmujemy tutaj offset = (index - prev_index)
+        same = 0;
+        not_same = 0;
+        // printf("Strip:  first_i: %d, curr_index: %d strip_size: %d\n", first_i, curr_index, strip_size);
+        // Ten for sprawdza ca³y pasek minus 1-2 ostatnie piksele, to ile ich zostanie zale¿y od ostatniej kompresji RRE
+        for (uint32_t k = 1; k < strip_size - 1; k++, curr_index++)
+        {
+            get_pixel(buf_screen, curr_index - 1, &prev);
             get_pixel(buf_screen, curr_index, &curr);
-            get_pixel(buf_screen, curr_index +1, &next);
-            //porównujemy 3 piksele. Jeœli piksel prev bêdzie 
+            get_pixel(buf_screen, curr_index + 1, &next);
+            //porównujemy 3 piksele.
             /*  Poni¿ej rozpisano 4 ró¿ne stany jakie mog¹ przyj¹æ 3 piksele i co w ka¿dej sytuacji zrobiæ (jakie ma byæ ns, s, czy kodowaæ RAW czy RRE czy jeszcze nie, o ile przesuwamy sprawdzanie).
             *   Funkcja przypisuje do RAW [pocz¹tek ; not_same] w³¹cznie gdzie "not_same" koñczy na pikselu "prev" i "prev" te¿ jest w minipasku do kodowania
             *   Funkcja przypisuje do RRE [pocz¹tek ; same] w³¹cznie gdzie "same" koñczy na pikselu "curr" i "curr" te¿ jest w minipasku do kodowania
-                p - prev, 
-                c - curr, 
-                n - next, 
-                ns  - dodaj tyle do not_same, 
+                p - prev,
+                c - curr,
+                n - next,
+                ns  - dodaj tyle do not_same,
                 s   - dodaj tyle do same
                 RAW - czy koñczymy pasek i kodujemy RAW
                 RRE - czy koñczymy pasek i kodujemy RRE
 
-                p | c | n |  ns  |  s  |  RAW  |  RRE  | przesun sprawdzanie o 
+                p | c | n |  ns  |  s  |  RAW  |  RRE  | przesun sprawdzanie o
                 1 = 1 = 1 |  0   |  1  |   0   |   0   | 1
                 1 = 1 ! 2 |  0   |  2  |   0   |   1   | 2              - dlaczego? teraz prev i curr s¹ takie same wiêc przesuwamy od razu o 2 ¿eby ich wiêcej nie analizowaæ i od razu zakodowaæ RRE
                 1 ! 2 = 2 |  1   |  0  |   1   |   0   | 1
                 1 ! 2 ! 3 |  1   |  0  |   0   |   0   | 1
 
             */
-            if(      memcmp(&prev, &curr, sizeof(cd_color_t))  &&  !memcmp(&curr, &next, sizeof(cd_color_t)) )    //if (prev != curr && curr == next)
+            if (memcmp(&prev, &curr, sizeof(cd_color_t)) && !memcmp(&curr, &next, sizeof(cd_color_t)))    //if (prev != curr && curr == next)
             {
                 not_same++; // tyle bitow zapiszemy do be w kodzie RAW
 
                 // zapisz RAW od poczatku do not_same
-                encode_raw(bs, be, size_buf_encoded, if_offset, offset, not_same);
+                // printf("Zapisuje RAW ten %d index w wielkosci %d\n", first_index, not_same);
+                encode_raw(buf_screen, &buf_encoded, &size_buf_encoded, if_index, first_index, not_same);
 
                 first_index = curr_index;
                 not_same = 0;
-                if_offset = 0;
+                if_index = 0;
+                licznikRAW++;
             }
-            else if ( !memcmp(&prev, &curr, sizeof(cd_color_t))  &&  memcmp(&curr, &next, sizeof(cd_color_t)) )    //else if (prev == curr && curr != next)
+            else if (!memcmp(&prev, &curr, sizeof(cd_color_t)) && memcmp(&curr, &next, sizeof(cd_color_t)))    //else if (prev == curr && curr != next)
             {
-            
                 same += 2;
-                k++;
-
-                //zapisz RRE od poczatku do same
-
+                //zapisz RRE od poczatku do same encode_rre(buf_screen, &buf_encoded, &size_buf_encoded, if_index, first_index, not_same);
+                // printf("Zapisuje RRE ten %d index w wielkosci %d\n", first_index, same);
                 first_index = curr_index + 1;
                 same = 0;
-                if_offset = 0;
+                if_index = 0;
+                k++;
+                curr_index++;
+                licznikRRE++;
             }
-            else if ( !memcmp(&prev, &curr, sizeof(cd_color_t))  &&  !memcmp(&curr, &next, sizeof(cd_color_t)) )    { same++;     } //else if (prev == curr && curr == next)
-            else                                                                                                    { not_same++; } //else if (prev != curr && curr != next)
+            else if (!memcmp(&prev, &curr, sizeof(cd_color_t)) && !memcmp(&curr, &next, sizeof(cd_color_t))) { same++; } //else if (prev == curr && curr == next)
+            else { not_same++; } //else if (prev != curr && curr != next)
         }
-        // TODO po tym forze zostana nieprzypisane do kodowania dok³adnie 1-2 piksele, wynika to z tego, ze zapisujemy do prev wlacznie, curr nie zapisujemy chyba ze jest to RRE, ostatniego piksela sprawdzamy tylko jako przyszlego
+        // printf("Bez 2 ostatnich:  not_same: %d same: %d first_i: %d, first_index: %d curr_index: %d strip_size: %d\n", not_same, same, first_i, first_index, curr_index, strip_size);
+
+        // Obs³uga 2 ostatnich pikseli w ca³ym obrazie + ci¹g, który nie zosta³ zapisany w poprzednich iteracjach
+        uint32_t last_pixels = strip_size - (curr_index - first_i+1); // define number of pixels to write
+        // printf("last_pixels: %d\n", last_pixels);
+        get_pixel(buf_screen, curr_index - 1, &prev);
+        if (last_pixels == 2) get_pixel(buf_screen, curr_index, &curr);
+        if (last_pixels == 1)
+        {
+            // printf("-----------------------------------------------------------------------------\n");
+            not_same++;
+            encode_raw(buf_screen, &buf_encoded, &size_buf_encoded, if_index, curr_index-1, not_same); // prev to RAW
+        }
+        else if(same > 0)
+        {
+            if (!memcmp(&prev, &curr, sizeof(cd_color_t))) //if prev == curr
+            {
+                same += 2;
+                encode_rre(buf_screen, &buf_encoded, &size_buf_encoded, if_index, first_index, same);  
+            }
+            else //if prev != curr
+            {
+                encode_rre(buf_screen, &buf_encoded, &size_buf_encoded, if_index, first_index, same);
+                same = 0;
+                not_same = 2;
+                encode_raw(buf_screen, &buf_encoded, &size_buf_encoded, if_index, first_index, not_same);
+            }
+ 
+        }
+        else  // ca³a reszta z 2 ostatnimi niezale¿nie czy sa takie same, bo i tak zajm¹ tyle samo bajtów
+        {
+            not_same += 2;
+            encode_raw(buf_screen, &buf_encoded, &size_buf_encoded, if_index, first_index, not_same);
+        }
+
+        // printf("not_same: %d same: %d\n", not_same, same);
+
         // prev - sprawdzony     curr - niesprawdzony     next - nie jest w ogole przypisywany
         offset = strip->index; // zapisujemy poprzedni index w offsecie bo offset nie jest na ten moment potrzebny a potem bedziemy odejmowac
         strip = strip->next;
+        }
     }
+    printf("Licznik RAW: %d  RRE: %d\n", licznikRAW, licznikRRE);
     return 0;
 }
 
@@ -526,7 +615,7 @@ int8_t  cd_encode2(
     void* buf_screen,                   //wskaznik na caly obraz
     void* buf_encoded,                  //bufor na dane zakodowane
     uint32_t* size_buf_encoded          //rozmiar pamieci wskazywany przez wskaznik buf_encoded i jednoczesnie pozakonczeniu dzialania funkcji jest to rozmiar zakodowanych danych
-)                                       //zwraca 0-OK lub inna wartosc gdy blad
+)                                       //zwraca 0: OK lub inna wartosc gdy blad
 {
     //uint8_t* strips;        // count; x,y,w,h,x,y,w,h,x,y,w,h,...
     split_into_strips(prev_buf_screen, buf_screen);
