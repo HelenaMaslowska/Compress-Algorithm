@@ -69,7 +69,7 @@ static void *alloc_read_file(char * filename, uint32_t *file_size)
         return NULL;
     }
 
-    int fd = _open(filename, O_RDWR);
+    int fd = _open(filename, O_RDONLY);
     if (fd == -1)
     {
         printf("Error opening file %s\n", filename);
@@ -82,18 +82,29 @@ static void *alloc_read_file(char * filename, uint32_t *file_size)
     return buf;
 }
 
+static void save_to_file(char* filename, void * buf, uint32_t size)
+{
+    int fd = _open(filename, O_CREAT | O_BINARY | O_WRONLY);
+    if (fd == -1) {
+        printf("Error opening file %s\n", filename);
+        //return EXIT_FAILURE;
+        exit(-1);
+    }
+    else
+    {
+        int r = _write(fd, buf, size);
+        _close(fd);
+    }
+}
 
 int main()
 {
     int8_t ret;
     uint32_t  size_buf_encoded = (CD_SCREEN_SIZE_WIDTH * CD_SCREEN_SIZE_HEIGHT * CD_PIXEL_COLOR_DEPTH) / 8 + 10;
     void* buf_encoded = calloc(size_buf_encoded, 1);
-    /*cd_rect_t rect;
+    //cd_rect_t rect;
     
     uint32_t size_buf_screen = (CD_SCREEN_SIZE_WIDTH * CD_SCREEN_SIZE_HEIGHT * CD_PIXEL_COLOR_DEPTH) / 8;
-
-    
-    */
 
     //cd_conv_xywh2rect(0, 0, CD_SCREEN_SIZE_WIDTH, CD_SCREEN_SIZE_HEIGHT, &rect);
     //cd_conv_xywh2rect(10, 10, 30, 30, &rect);
@@ -105,8 +116,10 @@ int main()
     char filename1[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\photo";
     char filename2[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\vector";
     char filename3[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\data_encoded";
-    char filename4[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\data_decoded";
-
+    char dane_po_zdekodowaniu[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\dane_po_zdekodowaniu";
+    char dane_zakodowane[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\dane_zakodowane";
+    char obraz_przed_kodowaniem[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\obraz_przed_kodowaniem";
+    char obraz_nowy_do_transferu[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\obraz_nowy_do_transferu";
     uint32_t filename1_size;
     uint32_t filename2_size;
     //uint32_t filename3_size;
@@ -115,7 +128,8 @@ int main()
     buf_screen      = alloc_read_file(filename1,    &filename1_size);
     prev_buf_screen = alloc_read_file(filename2,    &filename2_size);
 
-
+    save_to_file(obraz_przed_kodowaniem, prev_buf_screen, filename2_size);
+    save_to_file(obraz_nowy_do_transferu, buf_screen,     filename1_size);
 
 
 
@@ -134,14 +148,18 @@ int main()
         &size_buf_encoded       //rozmiar pamieci wskazywany przez wskaznik buf_encoded i jednoczesnie pozakonczeniu dzialania funkcji jest to rozmiar zakodowanych danych
     );
 
-    /*
+   
     if (ret == 0)
     {
-        printf("Zakodowane dane: ");
-        dump_frame_hex(buf_encoded, size_buf_encoded);
+       printf("Zakodowane dane: \n");
+       // dump_frame_hex(buf_encoded, size_buf_encoded);
     }
-
-    fd = open(filename2, O_WRONLY | O_CREAT);
+    else
+    {
+        printf("Nie udalo sie zdekodowac. \n");
+    }
+/*
+    int fd = open(filename3, O_WRONLY | O_CREAT);
     if (fd == -1) {
         printf("Error opening file %s\n", filename2);
         //return EXIT_FAILURE;
@@ -151,26 +169,23 @@ int main()
         write(fd, buf_encoded, size_buf_encoded);
         close(fd);
     }
+   */
+    //memset(buf_screen, 0, size_buf_screen);
 
-    memset(buf_screen, 0, size_buf_screen);
 // ------------------------------------------- DEKODOWANIE -------------------------------------------
+ 
+    save_to_file(dane_zakodowane, buf_encoded, size_buf_encoded);
+    
+
     ret = cd_decode(
         buf_encoded,            //wsk bufora na dane zakodowane
         size_buf_encoded,       //rozmiar pamieci wskazywany przez wskaznik buf_encoded i jednoczesnie pozakonczeniu dzialania funkcji jest to rozmiar zakodowanych danych
-        buf_screen,
+        prev_buf_screen,
         size_buf_screen
     );
 
-    fd = open(filename3, O_WRONLY | O_CREAT);
-    if (fd == -1) {
-        printf("Error opening file %s\n", filename3);
-        //return EXIT_FAILURE;
-    }
-    else
-    {
-        write(fd, buf_screen, size_buf_screen);
-        close(fd);
-    }
+    save_to_file(dane_po_zdekodowaniu, buf_screen, size_buf_screen);
+    
 
-    printf("code returned %d\n", (int)ret);*/
+    printf("code returned %d\n", (int)ret);
 }

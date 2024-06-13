@@ -19,18 +19,19 @@ enum
 enum
 {
     code_type_palette,                      //
-    code_type_rre,                          //Header, [Offset], Size, Color
-    code_type_raw,                          //Header, [Offset], Size, Color, Color ....
+    code_type_rre,                          //Header, [Offset - pixels], Size - pixels, Color
+    code_type_raw,                          //Header, [Offset - pixels], Size - pixels, Color, Color ....
 };
 //------------------------------------------------------------------------------
 typedef struct
 {
     uint8_t     code_type               :   2;
-    uint8_t     code_rect_exists        :   1;
-    uint8_t     size_width              :   2;
-    uint8_t     reserve                 :   3;
+    uint8_t     offset_size             :   2;  //mowi o ilosci bajtow offsetu. Offset wynosi  0: brak offsetu,   1: 1 bajty,   2: 2 bajty,   3: 3 bajty
+    uint8_t     data_size               :   2;
+    uint8_t     reserve                 :   2;
 } cd_hdr_t;             //1 bajt
 //------------------------------------------------------------------------------
+/*
 typedef struct
 {
     uint8_t     code_type               :   2;
@@ -39,22 +40,22 @@ typedef struct
     uint8_t     code_palette_exists     :   1;
     uint8_t     color_palette_count     :   2;  //liczba kolorow kodujacych w palecie minimum 2 kolory. Wartosc pola moze sie zmieniac od 0 do 15, z tym ze 0 oznacza 2 kolory, 1 - oznaczy 3 kolory itd. 2- oznacza 4 kolory. 15 oznacza 17 kolorow
 } cd_hdr_palette_t;     //1 bajt
+*/
 //------------------------------------------------------------------------------
 typedef struct
 {
     uint8_t     code_type               :   2;
-    uint8_t     code_rect_exists        :   1;
-    uint8_t     size_width              :   2;  //mowi o ilosci bajtow pola Size. Wartosc pola 0 oznacza ze dlugosc pola Size wynosi 1 bajt, 1 - 2 bajtym 2 - 3 bajty
-    uint8_t     reserve                 :   3;
+    uint8_t     offset_size             :   2;  //mowi o ilosci bajtow offsetu. Offset wynosi  0: brak offsetu,   1: 1 bajty,   2: 2 bajty,   3: 3 bajty
+    uint8_t     data_size               :   2;  //mowi o ilosci bajtow pola Size. Wartosc pola 0 oznacza ze dlugosc pola Size wynosi 1 bajt, 1 - 2 bajtym 2 - 3 bajty
+    uint8_t     reserve                 :   1;
 } cd_hdr_rre_t;         //1 bajt
 //------------------------------------------------------------------------------ 
 typedef struct
 {
     uint8_t     code_type               :   2;
-    uint8_t     offset_exists           :   1;
-    uint8_t     offset_size             :   2;  //mowi o ilosci bajtow offsetu. Offset wynosi  0: 1 bajt,   1: 2 bajty,   2: 3 bajty,   3: 4 bajty
+    uint8_t     offset_size             :   2;  //mowi o ilosci bajtow offsetu. Offset wynosi  0: brak offsetu,   1: 1 bajty,   2: 2 bajty,   3: 3 bajty
     uint8_t     data_size               :   2;  //mowi o ilosci bajtow size. Size wynosi  0: 1 bajt,   1: 2 bajty,   2: 3 bajty,   3: 4 bajty
-    uint8_t     reserve                 :   1;
+    uint8_t     reserve                 :   2;
 } cd_hdr_raw_t;         //1 bajt
 //------------------------------------------------------------------------------
 typedef struct
