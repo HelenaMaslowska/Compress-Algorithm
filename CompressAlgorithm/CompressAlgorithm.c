@@ -113,7 +113,7 @@ int main()
     void* buf_screen;
     void* prev_buf_screen;
 
-    char filename1[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\random";
+    char filename1[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\photo";
     char filename2[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\photo";
     char filename3[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\data_encoded";
     char dane_po_zdekodowaniu[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\dane_po_zdekodowaniu";
@@ -134,13 +134,6 @@ int main()
 
 
 // -------------------------------------------- KODOWANIE --------------------------------------------
-    //ret = cd_encode(
-    //    buf_screen,                   //wskaznik na caly obraz
-    //    &rect,                  //prostokat ktory wskazuje jakie dane zakodowac
-    //    buf_encoded,            //wsk bufora na dane zakodowane
-    //    &size_buf_encoded       //rozmiar pamieci wskazywany przez wskaznik buf_encoded i jednoczesnie pozakonczeniu dzialania funkcji jest to rozmiar zakodowanych danych
-    //);
-
     ret = cd_encode2(
         prev_buf_screen,
         buf_screen,                   //wskaznik na caly obraz

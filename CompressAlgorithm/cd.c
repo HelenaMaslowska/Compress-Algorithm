@@ -38,96 +38,7 @@ void cd_conv_xywh2rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, cd_rect_1
 
     memcpy(rect, &z, sizeof(cd_rect_10_t));
 }
-//------------------------------------------------------------------------------
-/*static uint32_t cd_to_bytes(uint32_t x)
-{
-    return ((x * CD_PIXEL_COLOR_DEPTH) / 8);
-}*/
-//------------------------------------------------------------------------------
-/*
-int8_t  cd_encode(void* buf_screen,     //wskaznik na caly obraz
-    cd_rect_t* rect,                    //prostokat ktory wskazuje jakie dane zakodowac - do wywalenia
-    void* buf_encoded,                  //bufor na dane zakodowane
-    uint32_t* size_buf_encoded          //rozmiar pamieci wskazywany przez wskaznik buf_encoded i jednoczesnie pozakonczeniu dzialania funkcji jest to rozmiar zakodowanych danych
-    )                                   //zwraca 0-OK lub inna wartosc gdy blad
-{
-    uint8_t* bs = (uint8_t *) buf_screen;
-    uint8_t* be = (uint8_t*) buf_encoded;
-    uint32_t ptr = 0;
-    uint32_t target_size = *size_buf_encoded;
-    uint16_t x;
-    uint16_t y;
-    uint16_t w;
-    uint16_t h;
-    uint32_t size;
-    uint32_t to_write;
-    uint8_t  size_width;    //0: 1 bajt, 1: 2 bajty, 2: 3 bajty, 3: 4 bajty
-    cd_hdr_raw_t* hdr;
 
-    //dump_frame_hex(buf_screen, 256);
-    
-
-    if (ptr + 1 > target_size) return -1;
-    hdr = (cd_hdr_raw_t*) &be[ptr];
-    ptr++;
-
-    // define type
-    hdr->code_type = code_type_raw;
-    hdr->code_rect_exists = 1;
-
-    if (hdr->code_rect_exists == 1)
-    {
-        if (ptr + sizeof(cd_rect_t) > target_size) return -1;
-        memcpy(&be[ptr], rect, sizeof(cd_rect_t));
-        ptr += sizeof(cd_rect_t);
-    }
-
-    cd_conv_rect2xywh(rect, &x, &y, &w, &h);
-
-    size = w * h;
-    printf("Wymiary: %d %d\n", w, h);
-
-    if (size < 256)
-    {
-        size_width = 0;
-    }
-    else if (size < 256 * 256)
-        {
-            size_width = 1;
-        }
-        else if (size < 256 * 256 * 256)
-            {
-                size_width = 2;
-            }
-            else
-            {
-                size_width = 3;
-            }
-
-    // define size_width
-    hdr->size_width = size_width;
-    //printf("%d %d\n", (int)size, (int)size_width);
-    if (ptr + size_width + 1 > target_size) return -1;
-    memcpy(&be[ptr], &size, size_width + 1);
-    ptr += size_width + 1;
-
-    // define data
-    bs += cd_to_bytes(x + (y * CD_SCREEN_SIZE_WIDTH));
-    to_write = cd_to_bytes(w);
-
-    for (int i = 0; i < h; i++)
-    {
-        if (ptr + to_write > target_size) return -1;
-        memcpy(&be[ptr], bs, to_write);
-        ptr += to_write;
-        bs += cd_to_bytes(CD_SCREEN_SIZE_WIDTH);
-    }
-
-    *size_buf_encoded = ptr;
-
-    return 0;
-}
-*/
 static void get_pixel(void* image, uint32_t index, cd_color_t* pixel)
 {
     uint8_t* image_int = (uint8_t*)image;
@@ -592,7 +503,7 @@ static uint8_t encode_strips(void* buf_screen, void* buf_encoded, uint32_t* size
             get_pixel(buf_screen, curr_index - 1, &prev);
             get_pixel(buf_screen, curr_index, &curr);
             get_pixel(buf_screen, curr_index + 1, &next);
-            //porównujemy 3 piksele.
+            // Porównujemy 3 piksele.
             /*  Poni¿ej rozpisano 4 ró¿ne stany jakie mog¹ przyj¹æ 3 piksele i co w ka¿dej sytuacji zrobiæ (jakie ma byæ ns, s, czy kodowaæ RAW czy RRE czy jeszcze nie, o ile przesuwamy sprawdzanie).
             *   Funkcja przypisuje do RAW [pocz¹tek ; not_same] w³¹cznie gdzie "not_same" koñczy na pikselu "prev" i "prev" te¿ jest w minipasku do kodowania
             *   Funkcja przypisuje do RRE [pocz¹tek ; same] w³¹cznie gdzie "same" koñczy na pikselu "curr" i "curr" te¿ jest w minipasku do kodowania
@@ -613,24 +524,19 @@ static uint8_t encode_strips(void* buf_screen, void* buf_encoded, uint32_t* size
             */
             if (memcmp(&prev, &curr, sizeof(cd_color_t)) && !memcmp(&curr, &next, sizeof(cd_color_t)))    //if (prev != curr && curr == next)
             {
-                not_same++; // tyle bitow zapiszemy do be w kodzie RAW
+                not_same++; // tyle pikseli zapiszemy do be w kodzie RAW
 
                 // zapisz RAW od poczatku do not_same
-                // printf("Zapisuje RAW ten %d index w wielkosci %d\n", first_index, not_same);
                 encode_raw(buf_screen, buf_encoded, *size_buf_encoded, &curr_size_bytes, if_index, first_index, not_same);
-                //encode_raw(void* buf_screen, void* buf_encoded, uint32_t max_size_be_bytes, uint32_t * curr_size, uint8_t if_index, uint32_t index_p, uint32_t pixels_count)
-
                 first_index = curr_index;
                 not_same = 0;
                 if_index = 0;
                 licznikRAW++;
-                //*size_buf_encoded += cd_to_bytes(not_same) + 2;
             }
             else if (!memcmp(&prev, &curr, sizeof(cd_color_t)) && memcmp(&curr, &next, sizeof(cd_color_t)))    //else if (prev == curr && curr != next)
             {
                 same += 2;
-                //zapisz RRE od poczatku do same encode_rre(buf_screen, &buf_encoded, &size_buf_encoded, if_index, first_index, not_same);
-                // printf("Zapisuje RRE ten %d index w wielkosci %d\n", first_index, same);
+                //zapisz RRE od poczatku do same 
                 encode_rre(buf_screen, buf_encoded, *size_buf_encoded, &curr_size_bytes, if_index, first_index, same);
 
                 first_index = curr_index + 1;
@@ -639,17 +545,13 @@ static uint8_t encode_strips(void* buf_screen, void* buf_encoded, uint32_t* size
                 k++;
                 curr_index++;
                 licznikRRE++;
-                // *size_buf_encoded += cd_to_bytes(1) + 2;
             }
             else if (!memcmp(&prev, &curr, sizeof(cd_color_t)) && !memcmp(&curr, &next, sizeof(cd_color_t))) { same++; } //else if (prev == curr && curr == next)
             else { not_same++; } //else if (prev != curr && curr != next)
         }
-        
-        // printf("Bez 2 ostatnich:  not_same: %d same: %d first_i: %d, first_index: %d curr_index: %d strip_size: %d\n", not_same, same, first_i, first_index, curr_index, strip_size);
 
         // Obs³uga 2 ostatnich pikseli w ca³ym obrazie + ci¹g, który nie zosta³ zapisany w poprzednich iteracjach
         uint32_t last_pixels = strip_size - (curr_index - first_i+1); // define number of pixels to write
-        // printf("last_pixels: %d\n", last_pixels);
         get_pixel(buf_screen, curr_index - 1, &prev);
         if (last_pixels == 2) get_pixel(buf_screen, curr_index, &curr);
         if (last_pixels == 1)
@@ -663,20 +565,14 @@ static uint8_t encode_strips(void* buf_screen, void* buf_encoded, uint32_t* size
             if (!memcmp(&prev, &curr, sizeof(cd_color_t))) //if prev == curr
             {
                 same += 2;
-                //encode_rre(buf_screen, buf_encoded, size_buf_encoded, if_index, first_index, same);  
-                // ODKOMENTOWAC TO WYZEJ
                 encode_rre(buf_screen, buf_encoded, size_buf_encoded, &curr_size_bytes, if_index, first_index, same);
-
             }
             else //if prev != curr
             {
-                //encode_rre(buf_screen, buf_encoded, size_buf_encoded, if_index, first_index, same);
-                // ODKOMENTOWAC TO WYZEJ
                 encode_rre(buf_screen, buf_encoded, size_buf_encoded, &curr_size_bytes, if_index, first_index, same);
                 same = 0;
                 not_same = 2;
                 encode_raw(buf_screen, buf_encoded, size_buf_encoded, &curr_size_bytes, if_index, first_index, not_same);
-                
             }
  
         }
@@ -720,7 +616,6 @@ int8_t  cd_encode2(
     return 0;
 }
 
-
 //------------------------------------------------------------------------------//------------------------------------------------------------------------------
 
 int8_t  cd_decode(  void*       buf_encoded,        // wszystkie dane zakodowane
@@ -747,8 +642,6 @@ int8_t  cd_decode(  void*       buf_encoded,        // wszystkie dane zakodowane
             cd_hdr_raw_t* hdr_raw = (cd_hdr_raw_t*)hdr;
             uint8_t offset_size = hdr_raw->offset_size;
             uint8_t data_size = hdr_raw->data_size+1;
-
-            
             uint32_t pixels_count = 0;
             if (offset_size)
             {
@@ -836,123 +729,6 @@ int8_t  cd_decode(  void*       buf_encoded,        // wszystkie dane zakodowane
 
         }
     }
-
-    /*
-    uint8_t* be = (uint8_t*)buf_encoded;
-    uint8_t* bs = (uint8_t*)buf_screen;
-    uint32_t control_sum = 0;
-    cd_hdr_t *hdr = (cd_hdr_t*) be++;
-    uint8_t type            = hdr->code_type;
-    uint8_t offsetExists    = hdr->offset_size;
-    uint8_t offsetSize      = hdr->offset_size;
-    uint8_t data_size       = hdr->data_size+1;
-    cd_rect_t rect;
-    uint32_t size;  // liczba pikseli zakodowana danym algorytmem
-    uint32_t size2;
-
-    //dump_frame_hex(buf_encoded, 15); // size_buf_encoded
-    //printf("%02X \n", type);
-    printf("Conversion type: %02X\n", type);
-
-    {
-        //odczyt pozycji bs z be
-        if (offsetExists == 1)
-        {
-            memcpy(&rect, be, sizeof(rect));
-            be += sizeof(rect);
-
-#ifdef CD_RECT_10
-            cd_conv_rect2xywh(&rect, &g_rect.x, &g_rect.y, &g_rect.w, &g_rect.h);
-#else
-            g_rect.x = rect.x;
-            g_rect.y = rect.y;
-            g_rect.w = rect.w;
-            g_rect.h = rect.h;
-#endif
-            g_rect.decoded_px = 0;
-
-            g_rect_exists = 1;
-
-            printf("%d %d %d %d\n", g_rect.x, g_rect.y, g_rect.w, g_rect.h);
-        }
-        else
-        {
-            printf("no %d\n", offsetExists);
-        }
-    }
-
-    {
-        //odczyt size
-        uint8_t size_width = hdr->data_size + 1;       // number of bytes
-        printf("bytes: %d\n", size_width);
-        size = 0;
-        memcpy(&size, be, size_width);
-        size2 = size;
-        be += size_width;
-    }
-
-    switch (type)
-    {
-    case code_type_rre:
-    case code_type_raw:
-        {
-            if (!g_rect_exists) return -1;
-            // based on where starts a rectangle I setup the bs start position to write
-            bs += cd_to_bytes(  (g_rect.y + g_rect.decoded_px / g_rect.w) * CD_SCREEN_SIZE_WIDTH + g_rect.x + g_rect.decoded_px % g_rect.w  );
-
-            uint32_t w = g_rect.w; // piksele
-        
-            // for the first row, if d >= size or d < size
-            if ((g_rect.decoded_px) % w != 0)  // czy piksele
-            {
-                uint32_t d = (w - g_rect.decoded_px % w);  // pozostalo do w
-                uint32_t d_w_size_bytes;
-                uint32_t d_w_size;
-
-                if (size >= d)      { d_w_size = d;     }
-                else                { d_w_size = size;  }
-                d_w_size_bytes = cd_to_bytes(d_w_size);
-                if ((control_sum + d_w_size_bytes) > size_buf_screen) return -1;
-                memcpy(bs, be, d_w_size_bytes);
-                be += d_w_size_bytes;
-                bs += d_w_size_bytes + cd_to_bytes(CD_SCREEN_SIZE_WIDTH-w);
-                g_rect.decoded_px += d_w_size;
-                control_sum += d_w_size_bytes;
-                size -= d_w_size;
-
-            }
-            // for every next row
-            while (size > 0)        // piksele
-            {
-                uint32_t d_w_size_bytes;
-                uint32_t d_w_size;
-
-                if (size / w > 0)   { d_w_size = w;     }
-                else                { d_w_size = size;  }
-
-                d_w_size_bytes = cd_to_bytes(d_w_size);
-                if ((control_sum + d_w_size_bytes) > size_buf_screen) return -1;
-                memcpy(bs, be, d_w_size_bytes);
-                be += d_w_size_bytes;
-                bs += d_w_size_bytes + cd_to_bytes(CD_SCREEN_SIZE_WIDTH - w);
-                g_rect.decoded_px += d_w_size;
-                control_sum += d_w_size_bytes;
-                size -= d_w_size;
-            }
-            dump_frame_hex(buf_screen, 256);
-            printf("control_sum: %u size2: %u\n", control_sum, (size2* CD_PIXEL_COLOR_DEPTH) / 8);
-            if (control_sum != (size2 * CD_PIXEL_COLOR_DEPTH) / 8) return -1;
-        }
-        break;
-    default:
-        {
-            printf("Error - compression failed\n");
-            return -1;
-        }
-    }
-    */
     return 0;
-
 }
-
 //------------------------------------------------------------------------------
