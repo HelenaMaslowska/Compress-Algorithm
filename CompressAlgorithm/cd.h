@@ -47,7 +47,7 @@ typedef struct
     uint8_t     code_type               :   2;
     uint8_t     offset_size             :   2;  //mowi o ilosci bajtow offsetu. Offset wynosi  0: brak offsetu,   1: 1 bajty,   2: 2 bajty,   3: 3 bajty
     uint8_t     data_size               :   2;  //mowi o ilosci bajtow pola Size. Wartosc pola 0 oznacza ze dlugosc pola Size wynosi 1 bajt, 1 - 2 bajtym 2 - 3 bajty
-    uint8_t     reserve                 :   1;
+    uint8_t     reserve                 :   2;
 } cd_hdr_rre_t;         //1 bajt
 //------------------------------------------------------------------------------ 
 typedef struct

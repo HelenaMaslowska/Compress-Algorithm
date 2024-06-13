@@ -84,7 +84,7 @@ static void *alloc_read_file(char * filename, uint32_t *file_size)
 
 static void save_to_file(char* filename, void * buf, uint32_t size)
 {
-    int fd = _open(filename, O_CREAT | O_BINARY | O_WRONLY);
+    int fd = _open(filename, O_CREAT | O_BINARY | O_WRONLY | O_TRUNC);
     if (fd == -1) {
         printf("Error opening file %s\n", filename);
         //return EXIT_FAILURE;
@@ -100,7 +100,7 @@ static void save_to_file(char* filename, void * buf, uint32_t size)
 int main()
 {
     int8_t ret;
-    uint32_t  size_buf_encoded = (CD_SCREEN_SIZE_WIDTH * CD_SCREEN_SIZE_HEIGHT * CD_PIXEL_COLOR_DEPTH) / 8 + 10;
+    uint32_t  size_buf_encoded = ((CD_SCREEN_SIZE_WIDTH * CD_SCREEN_SIZE_HEIGHT * CD_PIXEL_COLOR_DEPTH) / 8) * 2;
     void* buf_encoded = calloc(size_buf_encoded, 1);
     //cd_rect_t rect;
     
@@ -113,8 +113,8 @@ int main()
     void* buf_screen;
     void* prev_buf_screen;
 
-    char filename1[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\photo";
-    char filename2[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\vector";
+    char filename1[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\random";
+    char filename2[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\photo";
     char filename3[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\data_encoded";
     char dane_po_zdekodowaniu[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\dane_po_zdekodowaniu";
     char dane_zakodowane[] = "D:\\Desktop\\Helena\\Repositories\\Compress Algorithm\\examples\\dane_zakodowane";

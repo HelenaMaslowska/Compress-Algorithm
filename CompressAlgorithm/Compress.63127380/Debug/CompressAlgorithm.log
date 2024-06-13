@@ -1,14 +1,2 @@
-﻿  cd.c
-D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(609,49): warning C4047: 'function': 'uint32_t' differs in levels of indirection from 'uint32_t *'
-D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(609,49): warning C4024: 'encode_raw': different types for formal and actual parameter 3
-D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(620,53): warning C4047: 'function': 'uint32_t' differs in levels of indirection from 'uint32_t *'
-D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(620,53): warning C4024: 'encode_raw': different types for formal and actual parameter 3
-D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(627,53): warning C4047: 'function': 'uint32_t' differs in levels of indirection from 'uint32_t *'
-D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(627,53): warning C4024: 'encode_raw': different types for formal and actual parameter 3
-D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(630,53): warning C4047: 'function': 'uint32_t' differs in levels of indirection from 'uint32_t *'
-D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(630,53): warning C4024: 'encode_raw': different types for formal and actual parameter 3
-D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(638,49): warning C4047: 'function': 'uint32_t' differs in levels of indirection from 'uint32_t *'
-D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(638,49): warning C4024: 'encode_raw': different types for formal and actual parameter 3
-D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(691,13): warning C4133: '=': incompatible types - from 'uint8_t *' to 'cd_hdr_t *'
-D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\cd.c(401,1): warning C4715: 'encode_raw': not all control paths return a value
+﻿  CompressAlgorithm.c
   CompressAlgorithm.vcxproj -> D:\Desktop\Helena\Repositories\Compress Algorithm\CompressAlgorithm\Debug\CompressAlgorithm.exe
